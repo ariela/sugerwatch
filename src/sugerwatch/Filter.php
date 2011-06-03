@@ -26,11 +26,44 @@ namespace sugerwatch;
  */
 abstract class Filter
 {
+    /**
+     * フィルターを保持する
+     * @since 0.0.2
+     * @var array
+     */
+    private $m_filters = array();
+
+    /**
+     * フィルタの参照を保持する
+     * @since 0.0.2
+     * @param array $filters 
+     */
+    public function setFilters(array &$filters)
+    {
+        $this->m_filters = $filters;
+    }
+
+    /**
+     * フィルタを実行する
+     * @since 0.0.2
+     */
+    protected function applyFilter()
+    {
+        $args = func_get_args();
+        $call = array_shift($args);
+
+        foreach ($this->m_filters as $filter) {
+            $result = call_user_func_array(array($filter, $call), $args);
+            if (!empty($result) && is_string($result)) {
+                $this->stdout($result);
+            }
+        }
+    }
 
     /**
      * SugerWatchから通知がある場合に呼び出されるメソッド
      */
-    public function notify()
+    public function notify($type, $title, $message, array $options = array())
     {
         
     }

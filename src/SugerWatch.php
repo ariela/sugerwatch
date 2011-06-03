@@ -29,7 +29,7 @@ final class SugerWatch
      * SugerWatchのバージョン情報
      * @var string
      */
-    const VERSION = '0.0.1';
+    const VERSION = '0.0.2';
     /**
      * 標準出力に出力する文字コード
      * @var string 
@@ -107,7 +107,7 @@ final class SugerWatch
         $interval = $this->m_reload * 60;
 
         $this->stdout('監視処理開始');
-        $this->applyFilter('notify', '監視処理開始');
+        $this->applyFilter('notify', 'system', '監視開始' . 'ファイル更新を開始しました。');
         while (true) {
 
             // 一定時間毎にリストをリロードする
@@ -126,8 +126,9 @@ final class SugerWatch
                     $prevload = time();
                 }
 
-                $this->stdout('「%s」に変更がありました。', $changed);
-                $this->applyFilter('notify', '「%s」に変更がありました。', $changed);
+                $text = sprintf('「%s」に変更がありました。', $changed);
+                $this->stdout($text);
+                $this->applyFilter('notify', 'system', 'ファイルの変更を検知', $text);
                 $this->applyFilter('changed', $changed);
             }
         }
@@ -276,8 +277,9 @@ final class SugerWatch
      */
     private function listReload()
     {
-        $this->stdout('ファイルリストを再読み込みします。');
-        $this->applyFilter('notify', 'ファイルリストを再読み込みします。');
+        $msg = "ファイルリストを再読み込みします。";
+        $this->stdout($msg);
+        $this->applyFilter('notify', 'system', 'ファイルリスト再読込', $msg);
         $this->m_files = array();
         foreach ($this->m_targets as $target) {
             $this->readFiles($target);
@@ -327,7 +329,10 @@ final class SugerWatch
         $call = array_shift($args);
 
         foreach ($this->m_filters as $filter) {
-            call_user_func_array(array($filter, $call), $args);
+            $result = call_user_func_array(array($filter, $call), $args);
+            if (!empty($result) && is_string($result)) {
+                $this->stdout($result);
+            }
         }
     }
 

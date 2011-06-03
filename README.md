@@ -6,7 +6,7 @@ PHP5.3の環境で利用可能。
 
 簡単に使用方法
 --------------
-* 適当な位置へ配置
+* 適当な位置へ配置(pear install openpear/SugerWatch-alpha)
 * 利用したい位置へ移動
 * php インストールパス\SugerWatch.php -c scss.ini .
 
