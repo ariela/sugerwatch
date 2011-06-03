@@ -40,7 +40,7 @@ abstract class Filter
      */
     public function setFilters(array &$filters)
     {
-        $this->m_filters = $filters;
+        $this->m_filters =& $filters;
     }
 
     /**
@@ -51,7 +51,6 @@ abstract class Filter
     {
         $args = func_get_args();
         $call = array_shift($args);
-
         foreach ($this->m_filters as $filter) {
             $result = call_user_func_array(array($filter, $call), $args);
             if (!empty($result) && is_string($result)) {

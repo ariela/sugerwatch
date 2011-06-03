@@ -15,14 +15,37 @@ PHP5.3の環境で利用可能。
 ------------------
     #!/bin/sh
     sass --unix-newline -t compressed --scss --watch theme.scss:theme.css &
-    php /usr/local/sugerwatch/SugerWatch.php -c scss.ini -e .git,.sass-cache . &
+    sugerwatch -c scss.ini -e .git,.sass-cache . &
 
 上記方法でSCSS(Sass)でcssがコンパイルされたときにCSSの更新を検知し、gz圧縮をおこなっている。
+
+INIファイルの記述例
+-------------------
+使いたいフィルタ名をセクションに記述し、設定をキー=値の形式で記述する。
+
+    [SugerWatch]
+    ;charset=SJIS-win ;コンソールに出力する文字コード(未指定時はWINDOWSではSJIS-win、他ではUTF-8)
+    reload=0.5       ;30秒毎にファイルを走査する(未指定時は1分毎）
+    log=log.txt      ;ログ出力ファイルパス
+
+    [CompressGz]
+    file_pattern='\.(css|js)$'
+
+    [Growl]
+    application=sugerwatch
+    host=localhost
+    pass=sugerwatch
+    icon=http://transrain.net/growl/info.png
+    notification[]='change|display|変更検知'
+    notification[]='change|icon|http://transrain.net/growl/change.png'
+    notification[]='system|display|システムメッセージ'
+    notification[]='system|icon|http://transrain.net/growl/system.png'
+    notification[]='success|display|成功'
+    notification[]='success|icon|http://transrain.net/growl/ok.png'
+    notification[]='error|display|エラー'
+    notification[]='error|icon|http://transrain.net/growl/ng.png'
 
 TODO
 ----
 * ログ出力の実装
-* コマンドバッチの作成
-* Openpearでインストール可能にしたい
-* Growlフィルターの追加
 * Phingフィルターの追加

@@ -55,6 +55,7 @@ class CompressGz extends \sugerwatch\Filter
             flock($fp, LOCK_EX);
             gzwrite($fp, file_get_contents($file), filesize($file));
             gzclose($fp);
+            $this->applyFilter('notify', 'success', 'GZ圧縮', "「{$file}」をGZ圧縮しました。");
         }
     }
 }
