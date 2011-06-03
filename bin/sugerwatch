@@ -1,0 +1,12 @@
+#!@php_bin@
+<?php
+/**
+#!/usr/bin/env php
+ *  SugerWatch
+ */
+
+error_reporting(E_ALL ^ E_DEPRECATED);
+
+require_once 'SugerWatch.php';
+
+new SugerWatch();
