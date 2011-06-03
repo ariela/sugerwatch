@@ -15,7 +15,7 @@ PHP5.3の環境で利用可能。
 ------------------
     #!/bin/sh
     sass --unix-newline -t compressed --scss --watch theme.scss:theme.css &
-    php /usr/local/sugerwatch/SugerWatch.php -c scss.ini -e .git,.sass-cache . &
+    sugerwatch -c scss.ini -e .git,.sass-cache . &
 
 上記方法でSCSS(Sass)でcssがコンパイルされたときにCSSの更新を検知し、gz圧縮をおこなっている。
 
