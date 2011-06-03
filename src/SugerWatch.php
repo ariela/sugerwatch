@@ -107,7 +107,7 @@ final class SugerWatch
         $interval = $this->m_reload * 60;
 
         $this->stdout('監視処理開始');
-        $this->applyFilter('notify', 'system', '監視開始' . 'ファイル更新を開始しました。');
+        $this->applyFilter('notify', 'system', '監視開始', 'ファイル更新を開始しました。');
         while (true) {
 
             // 一定時間毎にリストをリロードする
@@ -377,3 +377,5 @@ final class SugerWatch
         echo "{$msg}\n";
     }
 }
+
+new SugerWatch();
