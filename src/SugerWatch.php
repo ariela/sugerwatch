@@ -59,11 +59,13 @@ final class SugerWatch
     {
         // クラスローダ
         spl_autoload_register(function($className) {
-            $classPath = str_replace('\\', '_', $className);
-            $classPath = implode(DIRECTORY_SEPARATOR, explode('_', $classPath));
-            $classPath .= '.php';
+            if (0 === strncmp($className, 'sugerwatch', 10)) {
+                $classPath = str_replace('\\', '_', $className);
+                $classPath = implode(DIRECTORY_SEPARATOR, explode('_', $classPath));
+                $classPath .= '.php';
             
-            @include_once $classPath;
+                @include_once $classPath;
+            }
         });
     
         // 出力エンコードを切り替える
