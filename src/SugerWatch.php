@@ -1,8 +1,27 @@
 <?php
 require_once 'Console/GetOpt.php';
-
 /**
  * ファイル更新検知ツール「SugerWatch」
+ *
+ * License:
+ * 
+ * Copyright 2011 Takeshi Kawamoto
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * @author  Takeshi Kawamoto <yuki@transrain.net>
+ * @version $Id:$
+ * @since   0.0.1
  */
 final class SugerWatch
 {
@@ -51,7 +70,7 @@ final class SugerWatch
      * @var array
      */
     private $m_filters = array();
-    
+
     /**
      * SugerWatchを実行する
      */
@@ -59,15 +78,15 @@ final class SugerWatch
     {
         // クラスローダ
         spl_autoload_register(function($className) {
-            if (0 === strncmp($className, 'sugerwatch', 10)) {
-                $classPath = str_replace('\\', '_', $className);
-                $classPath = implode(DIRECTORY_SEPARATOR, explode('_', $classPath));
-                $classPath .= '.php';
-            
-                @include_once $classPath;
-            }
-        });
-    
+                    if (0 === strncmp($className, 'sugerwatch', 10)) {
+                        $classPath = str_replace('\\', '_', $className);
+                        $classPath = implode(DIRECTORY_SEPARATOR, explode('_', $classPath));
+                        $classPath .= '.php';
+
+                        @include_once $classPath;
+                    }
+                });
+
         // 出力エンコードを切り替える
         if (0 === strncmp(PHP_OS, 'WIN', 3)) {
             $this->m_charset = 'SJIS-win';
@@ -264,7 +283,7 @@ final class SugerWatch
             $this->readFiles($target);
         }
     }
-    
+
     /**
      * 設定ファイルを読み込み
      */
@@ -272,23 +291,23 @@ final class SugerWatch
     {
         $configFile = realpath($configFile);
         if (!$configFile) return;
-        
+
         $config = parse_ini_file($configFile, true);
-        
+
         if (!$config) {
             $this->stdout('設定ファイル%sのフォーマットが不正です。', $configFile);
             exit(1);
         }
-        
+
         // システム設定
         if (isset($config['SugerWatch'])) {
             $sys = $config['SugerWatch'];
-            $this->m_charset = @$sys['charset'] ?: $this->m_charset;
-            $this->m_reload = @$sys['reload'] ?: 1;
-            $this->m_logfile = @$sys['log'] ?: null;
+            $this->m_charset = @$sys['charset'] ? : $this->m_charset;
+            $this->m_reload = @$sys['reload'] ? : 1;
+            $this->m_logfile = @$sys['log'] ? : null;
             unset($config['SugerWatch']);
         }
-        
+
         // フィルター構築
         foreach ($config as $filter => $options) {
             $class = '\\sugerwatch\\filter\\' . $filter;
@@ -297,16 +316,17 @@ final class SugerWatch
                 $this->m_filters[] = $obj;
             }
         }
-        
     }
 
+    /**
+     * フィルタを実行する
+     */
     private function applyFilter()
     {
         $args = func_get_args();
         $call = array_shift($args);
-    
-        foreach ($this->m_filters as $filter)
-        {
+
+        foreach ($this->m_filters as $filter) {
             call_user_func_array(array($filter, $call), $args);
         }
     }
