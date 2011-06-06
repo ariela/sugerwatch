@@ -253,6 +253,10 @@ final class SugerWatch
             return true;
         }
 
+        if (in_array(basename($path), $this->m_exclude)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -315,7 +319,7 @@ final class SugerWatch
             $class = '\\sugerwatch\\filter\\' . $filter;
             if (class_exists($class, true)) {
                 $obj = new $class($options);
-                $obj->setFilters(&$this->m_filters);
+                $obj->setFilters($this->m_filters);
                 $this->m_filters[] = $obj;
             }
         }
