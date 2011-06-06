@@ -8,14 +8,12 @@ PHP5.3の環境で利用可能。
 --------------
 * 適当な位置へ配置(pear install openpear/SugerWatch-alpha)
 * 利用したい位置へ移動
-* php インストールパス\SugerWatch.php -c scss.ini .
+* sugerwatch.php -c config.ini .
 
 
 作業例(SCSS使用時)
 ------------------
-    #!/bin/sh
-    sass --unix-newline -t compressed --scss --watch theme.scss:theme.css &
-    sugerwatch -c scss.ini -e .git,.sass-cache . &
+    sugerwatch -c [style.ini](https://github.com/ariela/sugerwatch/blob/master/ini_sample/style.ini) .
 
 上記方法でSCSS(Sass)でcssがコンパイルされたときにCSSの更新を検知し、gz圧縮をおこなっている。
 

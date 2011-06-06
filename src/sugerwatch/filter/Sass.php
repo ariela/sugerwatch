@@ -28,6 +28,7 @@ class Sass extends \sugerwatch\Filter
 {
 
     private $m_options = '--unix-newline --scss';
+    private $m_charset='utf-8';
     private $m_target;
     private $m_output;
     private $m_style = 'nested';
@@ -40,6 +41,7 @@ class Sass extends \sugerwatch\Filter
     public function __construct(array $options)
     {
         $this->m_options = @$options['option'] ?: $this->m_options;
+        $this->charset = @$options['charset'] ?: $this->m_charset;
         $this->m_target = @$options['target'] ?: '';
         $this->m_output = @$options['output'] ?: '';
         $this->m_style = @$options['style'] ?: '';
@@ -59,6 +61,9 @@ class Sass extends \sugerwatch\Filter
             }
             if (!empty($this->m_style)) {
                 $cmd .= ' -t ' . $this->m_style;
+            }
+            if (!empty($this->m_charset)) {
+                $cmd .= ' -E ' . $this->m_charset;
             }
             $cmd .= sprintf(' --stdin < %s > %s', $this->m_target, $this->m_output);
             exec($cmd);
