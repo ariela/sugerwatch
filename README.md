@@ -1,25 +1,43 @@
 SugerWatch
 ==========
-ファイルの変更を監視し、変更があった場合にフィルターを実行するアプリケーション。
+ファイルの変更を監視し、変更があった場合にフィルタを実行するアプリケーション。
+ファイル変更時に処理を実行させたい場合に利用することができる。
 
-PHP5.3の環境で利用可能。
+動作環境
+--------
+PHP 5.3以上
 
-簡単に使用方法
---------------
-* 適当な位置へ配置(pear install openpear/SugerWatch-alpha)
-* 利用したい位置へ移動
-* sugerwatch.php -c config.ini .
+フィルタ一覧
+------------
+* CompressGz: 指定したファイル名の正規表現にマッチするファイルを変更時にGZ圧縮する。
+* Growl: 通知をGrowlで表示する。
+* Sass: [Sass](http://sass-lang.com/)でSCSSをCSSにコンパイルする。
 
+インストール
+------------
+Openpearからインストールが可能です。
+
+    pear channel-discover openpear.org
+    pear install openpear/SugerWatch-alpha
+
+使用方法
+--------
+利用するにはコマンドラインからSugerWatchを呼び出します。
+
+    sugerwatch -c config.ini ./
 
 作業例(SCSS使用時)
 ------------------
-    sugerwatch -c [style.ini](https://github.com/ariela/sugerwatch/blob/master/ini_sample/style.ini) .
+[style.ini](https://github.com/ariela/sugerwatch/blob/master/ini_sample/style.ini)
 
-上記方法でSCSS(Sass)でcssがコンパイルされたときにCSSの更新を検知し、gz圧縮をおこなっている。
+    sugerwatch -c style.ini ./
+
+上記方法で実行ディレクトリの*.scssが変更されたときにscssコマンドを実行し、cssにコンパイルした後にgz圧縮を行うことができる。
 
 INIファイルの記述例
 -------------------
 使いたいフィルタ名をセクションに記述し、設定をキー=値の形式で記述する。
+設定方法はフィルタによって異なる。
 
     [SugerWatch]
     ;charset=SJIS-win ;コンソールに出力する文字コード(未指定時はWINDOWSではSJIS-win、他ではUTF-8)
@@ -29,19 +47,47 @@ INIファイルの記述例
     [CompressGz]
     file_pattern='\.(css|js)$'
 
-    [Growl]
-    application=sugerwatch
-    host=localhost
-    pass=sugerwatch
-    icon=http://transrain.net/growl/info.png
-    notification[]='change|display|変更検知'
-    notification[]='change|icon|http://transrain.net/growl/change.png'
-    notification[]='system|display|システムメッセージ'
-    notification[]='system|icon|http://transrain.net/growl/system.png'
-    notification[]='success|display|成功'
-    notification[]='success|icon|http://transrain.net/growl/ok.png'
-    notification[]='error|display|エラー'
-    notification[]='error|icon|http://transrain.net/growl/ng.png'
+フィルタの設定
+--------------
+
+### 本体設定 ###
+本体設定は*SugerWatch*セクションにて行う。
+
+|キー    |値 |
+|--------|---|
+|charset |コンソールに出力する文字コードを指定する。未指定時はWINDOWSの場合はShift-JIS、他のOSではUTF-8で出力される。mb_convert_encodingに使われる値|
+|reload  |ファイル走査の間隔秒数を指定する。未指定時は1分毎にファイルを走査して追加されたファイルを調査対象にする。|
+|log     |(未実装) コンソールに出力されるメッセージをログに出力する。|
+
+### CompressGz フィルタ ###
+CompressGz フィルタ設定は*CompressGz*セクションにて行う。
+
+|キー         |値 |
+|-------------|---|
+|file_pattern |正規表現で圧縮対象のファイル名を指定する。
+
+### Growl フィルタ ###
+Growl フィルタ設定は*Growl*セクションにて行う。
+
+|キー           |値 |
+|---------------|---|
+|application    |アプリケーション名を設定する。|
+|host           |Growlメッセージを送信する先のホスト名・IPアドレスを設定する。|
+|pass           |Growlの通知用パスワードを設定する。|
+|icon           |アプリケーションのアイコン画像URLを設定する。|
+|notification[] |通知設定。複数行設定可能。「メッセージタイプ\|設定ID\|設定名」の形式で記述|
+
+### Sass フィルタ ###
+Sass フィルタ設定は*Sass*セクションにて行う。
+
+|キー    |値 |
+|--------|---|
+|charset |出力するCSSの文字コード|
+|target  |変換元のSCSSファイル|
+|output  |変換先のCSSファイル|
+|style   |CSSの出力フォーマット。未指定時はnested。Sassの--style設定。|
+|import  |Sassのpartialを配置しているディレクトリ。Windowsの場合、\\を/に変更して記述する。|
+|option  |追加するSassのオプション|
 
 TODO
 ----
