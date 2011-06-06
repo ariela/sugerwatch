@@ -49,3 +49,11 @@ TODO
 ----
 * ログ出力の実装
 * Phingフィルターの追加
+
+Net_Growlのバグ
+---------------
+Net_Growlには[日本語メッセージが送信できないバグ](http://pear.php.net/bugs/bug.php?id=18589)があります。
+Growlフィルタを利用する場合は下記パッチを適応してください。
+
+* [Net_Growl_Gntp](http://pear.php.net/bugs/bug.php?id=18589&edit=12&patch=Gntp.php&revision=latest)
+* [Net_Growl_Udp](http://pear.php.net/bugs/bug.php?id=18589&edit=12&patch=Udp.php&revision=latest)
