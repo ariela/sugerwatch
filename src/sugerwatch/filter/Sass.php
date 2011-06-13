@@ -54,7 +54,7 @@ class Sass extends \sugerwatch\Filter
      */
     public function changed($file)
     {
-        if (preg_match("/\.scss$/", $file)) {
+        if ($this->m_target === basename($file)) {
             $cmd = sprintf('sass %s', $this->m_options);
             if (!empty($this->m_import)) {
                 $cmd .= ' -I ' . $this->m_import;
@@ -65,6 +65,7 @@ class Sass extends \sugerwatch\Filter
             if (!empty($this->m_charset)) {
                 $cmd .= ' -E ' . $this->m_charset;
             }
+            $cmd .= ' --cache-location .sass-cache ';
             $cmd .= sprintf(' --stdin < %s > %s', $this->m_target, $this->m_output);
             exec($cmd);
 
