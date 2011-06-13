@@ -12,6 +12,7 @@ PHP 5.3以上
 * CompressGz: 指定したファイル名の正規表現にマッチするファイルを変更時にGZ圧縮する。
 * Growl: 通知をGrowlで表示する。
 * Sass: [Sass](http://sass-lang.com/)でSCSSをCSSにコンパイルする。
+* Combine: 指定したファイルを1つのファイルに結合する。
 
 インストール
 ------------
@@ -75,7 +76,7 @@ Growl フィルタ設定は*Growl*セクションにて行う。
 |host           |Growlメッセージを送信する先のホスト名・IPアドレスを設定する。|
 |pass           |Growlの通知用パスワードを設定する。|
 |icon           |アプリケーションのアイコン画像URLを設定する。|
-|notification[] |通知設定。複数行設定可能。「メッセージタイプ\|設定ID\|設定名」の形式で記述|
+|notification[] |通知設定。複数行設定可能。「メッセージタイプ\\|設定ID\\|設定名」の形式で記述|
 
 ### Sass フィルタ ###
 Sass フィルタ設定は*Sass*セクションにて行う。
@@ -89,6 +90,12 @@ Sass フィルタ設定は*Sass*セクションにて行う。
 |import  |Sassのpartialを配置しているディレクトリ。Windowsの場合、\\を/に変更して記述する。|
 |option  |追加するSassのオプション|
 
+### Combine フィルタ ###
+Combine フィルタ設定は*Combine*セクションにて行う。
+|キー    |値 |
+|--------|---|
+|target[]|結合情報「結合先\\|結合元1\\|...\\|結合元x」の形式で記述|
+
 TODO
 ----
 * ログ出力の実装
@@ -96,8 +103,11 @@ TODO
 
 Net_Growlのバグ
 ---------------
-Net_Growlには[日本語メッセージが送信できないバグ](http://pear.php.net/bugs/bug.php?id=18589)があります。
+Net_Growl2.2.2には[日本語メッセージが送信できないバグ](http://pear.php.net/bugs/bug.php?id=18589)があります。
 Growlフィルタを利用する場合は下記パッチを適応してください。
 
+Net_Growl2.3で修正が取り込まれる予定となっています。
+
+* [Net_Growl](http://pear.php.net/bugs/bug.php?id=18589&edit=12&patch=Growl.php&revision=latest)
 * [Net_Growl_Gntp](http://pear.php.net/bugs/bug.php?id=18589&edit=12&patch=Gntp.php&revision=latest)
 * [Net_Growl_Udp](http://pear.php.net/bugs/bug.php?id=18589&edit=12&patch=Udp.php&revision=latest)
