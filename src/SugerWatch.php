@@ -36,6 +36,10 @@ final class SugerWatch
      */
     private $m_charset = 'UTF-8';
     /**
+     * 設定ファイル名
+     */
+    private $m_configfile;
+    /**
      * 監視対象ファイル一覧
      * @var array
      */
@@ -65,6 +69,16 @@ final class SugerWatch
      * @var boolean
      */
     private $m_usage = false;
+    /**
+     * ファイル変更通知を表示する場合はtrue
+     * @var boolean
+     */
+    private $m_notify_change = true;
+    /**
+     * リスト再読み込み通知を表示する場合はtrue
+     * @var boolean
+     */
+    private $m_notify_reload = true;
     /**
      * フィルターを保持する
      * @var array
@@ -107,7 +121,7 @@ final class SugerWatch
         $interval = $this->m_reload * 60;
 
         $this->stdout('監視処理開始');
-        $this->applyFilter('notify', 'system', '監視開始', 'ファイル更新を開始しました。');
+        $this->applyFilter('notify', 'system', '監視開始', 'ファイル監視を開始しました。');
         while (true) {
 
             // 一定時間毎にリストをリロードする
@@ -119,16 +133,27 @@ final class SugerWatch
             usleep(500000);
             $changed = $this->checkChangeFile();
             if ($changed) {
-                if (file_exists($changed)) {
-                    $this->m_files[$changed] = filemtime($changed);
-                } else {
+                if (realpath($this->m_configfile) === $changed) {
+                    // 変更ファイルが設定ファイルの場合は読み込みなおしてリロード
+                    $this->loadConfig($changed);
                     $this->listReload();
                     $prevload = time();
+                    continue;
+                } elseif (file_exists($changed)) {
+                    // 変更ファイルが存在していることをチェック
+                    $this->m_files[$changed] = filemtime($changed);
+                }  else {
+                    // 削除された場合はリロード
+                    $this->listReload();
+                    $prevload = time();
+                    continue;
                 }
 
-                $text = sprintf('「%s」に変更がありました。', $changed);
-                $this->stdout($text);
-                $this->applyFilter('notify', 'system', 'ファイルの変更を検知', $text);
+                if ($this->m_notify_change) {
+                    $text = sprintf('「%s」に変更がありました。', $changed);
+                    $this->stdout($text);
+                    $this->applyFilter('notify', 'system', 'ファイルの変更を検知', $text);
+                }
                 $this->applyFilter('changed', $changed);
             }
         }
@@ -140,7 +165,7 @@ final class SugerWatch
     private function parseArguments()
     {
         // オプション情報の取得
-        $shortoptions = 'c:e:';
+        $shortoptions = 'c:';
         $longoptions = '';
         $console = new Console_GetOpt();
         $args = $console->getopt($console->readPHPArgv(), $shortoptions);
@@ -155,12 +180,6 @@ final class SugerWatch
             } else {
                 $this->stdout('原因不明のエラーが発生しました。');
             }
-            return false;
-        }
-
-        // ディレクトリ/ファイルパスのチェック
-        if (empty($args[1])) {
-            $this->stdout('監視対象が指定されていません。');
             return false;
         }
 
@@ -193,19 +212,11 @@ final class SugerWatch
                 case 'c':
                     // 設定ファイル
                     $config = $option[1];
+                    $this->m_configfile = $config;
                     $this->loadConfig($config);
-                    break;
-
-                case 'e':
-                    // 監視対象外
-                    $exclude = array_filter(array_map('realpath', explode(',', $option[1])));
                     break;
             }
         }
-
-        // 設定を保持させる
-        $this->m_targets = $files;
-        $this->m_exclude = $exclude;
 
         return true;
     }
@@ -227,13 +238,16 @@ final class SugerWatch
             $d = dir($path);
             while (false !== ($entry = $d->read())) {
                 if ($entry === '.' || $entry === '..') continue;
+                if (in_array($entry, $this->m_exclude)) continue;
+                
                 $file = $path . DIRECTORY_SEPARATOR . $entry;
                 $this->readFiles($file);
             }
         } elseif (is_file($path)) {
             // ファイルの場合は最終更新日時を取得する
             if ($path === $this->m_logfile) return;
-            if ($this->isExclude($path)) return;
+            if ($this->isExclude(basename($path))) return;
+            
             $this->m_files[$path] = filemtime($path);
         }
     }
@@ -281,9 +295,11 @@ final class SugerWatch
      */
     private function listReload()
     {
-        $msg = "ファイルリストを再読み込みします。";
-        $this->stdout($msg);
-        $this->applyFilter('notify', 'system', 'ファイルリスト再読込', $msg);
+        if ($this->m_notify_reload) {
+            $msg = "ファイルリストを再読み込みします。";
+            $this->stdout($msg);
+            $this->applyFilter('notify', 'system', 'ファイルリスト再読込', $msg);
+        }
         $this->m_files = array();
         foreach ($this->m_targets as $target) {
             $this->readFiles($target);
@@ -308,13 +324,34 @@ final class SugerWatch
         // システム設定
         if (isset($config['SugerWatch'])) {
             $sys = $config['SugerWatch'];
+            
             $this->m_charset = @$sys['charset'] ? : $this->m_charset;
             $this->m_reload = @$sys['reload'] ? : 1;
             $this->m_logfile = @$sys['log'] ? : null;
+            $this->m_notify_change = @(bool)$sys['notify_change'] ? : false;
+            $this->m_notify_reload = @(bool)$sys['notify_reload'] ? : false;
+
+            if (!isset($sys['include'])) {
+                $this->m_targets = array(realpath('.'));
+            } else if (is_string($sys['include'])) {
+                $this->m_targets = array($sys['include']);
+            } else {
+                $this->m_targets = $sys['include'];
+            }
+            
+            if (!isset($sys['exclude'])) {
+                $this->m_exclude = array();
+            } else if (is_string($sys['exclude'])) {
+                $this->m_exclude = array($sys['exclude']);
+            } else {
+                $this->m_exclude = $sys['exclude'];
+            }
+            
             unset($config['SugerWatch']);
         }
 
         // フィルター構築
+        $this->m_filters = array();
         foreach ($config as $filter => $options) {
             $class = '\\sugerwatch\\filter\\' . $filter;
             if (class_exists($class, true)) {
@@ -348,10 +385,7 @@ final class SugerWatch
     {
         $this->m_usage = true;
         $out = array();
-        $out[] = 'Usage: SugerWatch -c <config> [options] [directory or file]';
-        $out[] = 'Options:';
-        $out[] = '    -c <config>    必須:SugerWatchの設定ファイル';
-        $out[] = '    -e <exclude>   監視対象外のファイル名(カンマ区切りで複数ファイル)';
+        $out[] = 'Usage: SugerWatch -c <config>';
         foreach ($out as $line) {
             $this->stdout($line);
         }

@@ -55,6 +55,9 @@ class Sass extends \sugerwatch\Filter
     public function changed($file)
     {
         if ($this->m_target === basename($file)) {
+            
+            $outfile = dirname($file) . DIRECTORY_SEPARATOR . $this->m_output;
+            
             $cmd = sprintf('sass %s', $this->m_options);
             if (!empty($this->m_import)) {
                 $cmd .= ' -I ' . $this->m_import;
@@ -66,7 +69,7 @@ class Sass extends \sugerwatch\Filter
                 $cmd .= ' -E ' . $this->m_charset;
             }
             $cmd .= ' --cache-location .sass-cache ';
-            $cmd .= sprintf(' --stdin < %s > %s', $this->m_target, $this->m_output);
+            $cmd .= sprintf(' --stdin < %s > %s', $file, $outfile);
             exec($cmd);
 
             $this->applyFilter('notify', 'success', 'SCSS', "「{$file}」をCSS化しました。");

@@ -38,7 +38,6 @@ class Growl extends \sugerwatch\Filter
      */
     public function __construct(array $options)
     {
-    
         // 接続オプション
         $opt = array(
             'host' => @$options['host'] ?: 'localhost',
@@ -60,9 +59,6 @@ class Growl extends \sugerwatch\Filter
             
             if (!isset($notify[$k1])) $notify[$k1] = array();
             $notify[$k1][$k2] = $v;
-            /*
-            
-            */
         }
         
         $app =  @$options['application'] ?: 'SugerWatch';
